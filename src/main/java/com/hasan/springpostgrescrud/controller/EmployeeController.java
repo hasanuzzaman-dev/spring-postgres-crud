@@ -1,8 +1,7 @@
 package com.hasan.springpostgrescrud.controller;
 
 import com.hasan.springpostgrescrud.dto.EmployeeDto;
-import com.hasan.springpostgrescrud.dto.ErrorResponseDto;
-import com.hasan.springpostgrescrud.exeption.ResourceNotFoundException;
+import com.hasan.springpostgrescrud.exeption.BadRequestException;
 import com.hasan.springpostgrescrud.service.EmployeeService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -25,6 +24,9 @@ public class EmployeeController {
 
     @GetMapping("/{id}")
     public ResponseEntity<EmployeeDto> getEmployeeById(@PathVariable Long id) {
+        if (id == null || id <= 0) {
+            throw new BadRequestException("Invalid employee ID provided.");
+        }
         EmployeeDto employeeDto = employeeService.getEmployeeById(id);
         return new ResponseEntity<>(employeeDto, HttpStatus.OK);
     }
@@ -35,25 +37,5 @@ public class EmployeeController {
         return new ResponseEntity<>(employeeDtoList, HttpStatus.OK);
     }
 
-    @ExceptionHandler
-    public ResponseEntity<ErrorResponseDto> handleException(ResourceNotFoundException e) {
-
-        ErrorResponseDto errorResponseDto = new ErrorResponseDto();
-        errorResponseDto.setStatus(HttpStatus.NOT_FOUND.value());
-        errorResponseDto.setMessage(e.getMessage());
-        errorResponseDto.setTimestamp(System.currentTimeMillis());
-
-        return new ResponseEntity<>(errorResponseDto, HttpStatus.NOT_FOUND);
-    }
-
-    @ExceptionHandler
-    public ResponseEntity<ErrorResponseDto> handleException(Exception e) {
-        ErrorResponseDto errorResponseDto = new ErrorResponseDto();
-        errorResponseDto.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
-        errorResponseDto.setMessage(e.getMessage());
-        errorResponseDto.setTimestamp(System.currentTimeMillis());
-
-        return new ResponseEntity<>(errorResponseDto, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
 
 }
